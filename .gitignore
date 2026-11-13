@@ -1,0 +1,7 @@
+.venv/
+.env
+credentials/*
+!credentials/.gitkeep
+logs/*.log*
+__pycache__/
+*.pyc

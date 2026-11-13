@@ -1,0 +1,43 @@
+﻿Test Case ID,Requirement ID,Test Scenario,Test Case Description,Preconditions,Test Steps,Test Data,Expected Result,Priority,Test Type,Automation Suitability,Requirement Traceability,Status
+TC-REQ-001-001,REQ-001,Login with valid credentials,Verify a registered user can log in,User is registered and on the login page,"1. Enter a valid email
+2. Enter a valid password
+3. Click Log in",email=alice@example.com; password=Str0ng#Pass1,User is redirected to the dashboard and their name is shown in the header,High,Positive,Yes,REQ-001 | AC: Successful login redirects the user to the dashboard,Approved
+TC-REQ-001-002,REQ-001,Login with wrong password,Verify a generic error is shown for a wrong password,User is registered and on the login page,"1. Enter a valid email
+2. Enter an incorrect password
+3. Click Log in",email=alice@example.com; password=WrongPass99,A generic 'Invalid email or password' message is shown and no session is created,High,Negative,Yes,REQ-001 | AC: An invalid email or password shows a generic error message,Draft
+TC-REQ-001-003,REQ-001,Password at minimum length (8),Boundary: lowest allowed password length,User is registered and on the login page,"1. Enter a valid email
+2. Enter an 8-character valid password
+3. Click Log in",password=Abcd#123 (8 chars),Login succeeds with the 8-character password,Medium,Boundary,Yes,REQ-001 | AC: password must be between 8 and 20 characters,Draft
+TC-REQ-001-004,REQ-001,Password below minimum length (7),Boundary: one below the minimum,User is registered and on the login page,"1. Enter a valid email
+2. Enter a 7-character password
+3. Click Log in",password=Abcd#12 (7 chars),Validation message states the password must be 8 to 20 characters; login is not attempted,Medium,Boundary,Yes,REQ-001 | AC: password must be between 8 and 20 characters,Draft
+TC-REQ-001-005,REQ-001,Password above maximum length (21),Boundary: one above the maximum,User is registered and on the login page,"1. Enter a valid email
+2. Enter a 21-character password
+3. Click Log in",password=Abcdefgh#12345678901 (21 chars),Validation message states the password must be 8 to 20 characters,Medium,Boundary,Yes,REQ-001 | AC: password must be between 8 and 20 characters,Draft
+TC-REQ-001-006,REQ-001,Account lock after 5 failed attempts,Verify lockout on the fifth consecutive failure,User is registered and on the login page,"1. Enter a valid email
+2. Submit a wrong password 5 times in a row
+3. Submit the correct password a 6th time",email=alice@example.com; wrong password x5,The 6th attempt is rejected with an account-locked message and the account stays locked for 15 minutes,High,Security,Yes,REQ-001 | AC: After 5 consecutive failed attempts the account is locked for 15 minutes,Draft
+TC-REQ-001-007,REQ-001,Malformed email format,Verify email format validation,User is registered and on the login page,"1. Enter an email without an @ symbol
+2. Enter any password
+3. Click Log in",email=alice.example.com,An inline error states the email format is invalid and the form is not submitted,Medium,Validation,Yes,REQ-001 | AC: Email must be a valid format,Draft
+TC-REQ-001-008,REQ-001,SQL injection in email field,Verify input is sanitised,User is registered and on the login page,"1. Enter a SQL injection string in the email field
+2. Enter any password
+3. Click Log in",email=' OR '1'='1' --,The input is rejected with a generic error; no data is exposed and no session is created,High,Security,Partial,REQ-001 | AC: Email must be a valid format,Draft
+TC-REQ-002-001,REQ-002,Transfer a valid amount,Verify a normal transfer completes,User is logged in with balance 20000 and a saved beneficiary,"1. Select the beneficiary
+2. Enter amount 500
+3. Confirm the transfer",amount=500,"Transfer succeeds, balance is reduced by 500 and a transaction reference number is displayed",High,Positive,Yes,REQ-002 | AC: A transaction reference number is shown after success,Draft
+TC-REQ-002-002,REQ-002,Amount at minimum (1),Boundary: lowest allowed amount,User is logged in with a saved beneficiary,"1. Select the beneficiary
+2. Enter amount 1
+3. Confirm",amount=1,Transfer succeeds for the minimum amount,Medium,Boundary,Yes,REQ-002 | AC: Transfer amount must be at least 1,Draft
+TC-REQ-002-003,REQ-002,Amount below minimum (0),Boundary: one below the minimum,User is logged in with a saved beneficiary,"1. Select the beneficiary
+2. Enter amount 0
+3. Confirm",amount=0,Validation error says the minimum transfer amount is 1; no transfer is created,Medium,Boundary,Yes,REQ-002 | AC: Transfer amount must be at least 1,Draft
+TC-REQ-002-004,REQ-002,Amount above maximum (50001),Boundary: one above the per-transaction maximum,User is logged in with balance 100000,"1. Select the beneficiary
+2. Enter amount 50001
+3. Confirm",amount=50001,Transfer is blocked with a message that the maximum per transaction is 50000,High,Boundary,Yes,REQ-002 | AC: at most 50000 per transaction,Draft
+TC-REQ-002-005,REQ-002,Amount exceeds available balance,Verify insufficient-funds handling,User is logged in with balance 300,"1. Select the beneficiary
+2. Enter amount 500
+3. Confirm",amount=500; balance=300,Transfer is rejected with an insufficient balance message and the balance is unchanged,High,Negative,Yes,REQ-002 | AC: Amount cannot exceed the available balance,Draft
+TC-REQ-002-006,REQ-002,OTP required above 10000,Verify OTP step for a large transfer,User is logged in with balance 50000,"1. Select the beneficiary
+2. Enter amount 10001
+3. Confirm and observe the next step",amount=10001,An OTP prompt is displayed and the transfer completes only after a valid OTP is entered,High,Security,Partial,REQ-002 | AC: A confirmation OTP is required for transfers above 10000,Draft

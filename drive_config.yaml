@@ -1,0 +1,45 @@
+# Google Drive source for the requirement specification.
+# Edit this file, then click "Load from Google Drive" on the Requirement Upload page.
+
+google_drive:
+  enabled: true
+
+  # How to authenticate:
+  #   service_account : share the file with the service-account e-mail (recommended, no browser prompt)
+  #   oauth           : opens a browser once; token is cached in token_file
+  #   public_link     : file shared as "Anyone with the link" - no credentials needed
+  auth_mode: public_link
+  service_account_file: credentials/service_account.json
+  oauth_client_file: credentials/oauth_client.json
+  token_file: credentials/token.json
+
+  # Identify the file: use ONE of file_id / file_url / (folder_id + file_name)
+  file_id: ""                # e.g. 1AbCdEfGhIjKlMnOpQrStUvWxYz
+  #file_url: ""               # full https://drive.google.com/... or docs.google.com/... link
+  file_url: "https://docs.google.com/document/d/19fI1xIO_kmYcA8RwoU0il5x82KDTRyocYHo7OfFzad0/edit?usp=sharing"               # full https://drive.google.com/... or docs.google.com/... link
+  folder_id: ""              # used together with file_name
+  file_name: ""              # e.g. "Requirements.xlsx"
+
+  # Google-native files (Docs/Sheets) are exported to this format:
+  #   Docs -> docx | pdf | txt        Sheets -> xlsx | csv
+  export_format_doc: docx
+  export_format_sheet: xlsx
+
+# Used when the file is a spreadsheet / CSV.
+spreadsheet:
+  sheet_name: ""             # empty = first sheet
+  header_row: 1
+  columns:                   # map YOUR column titles to the app's fields
+    requirement_id: "Requirement ID"
+    title: "Title"
+    description: "Description"
+    acceptance_criteria: "Acceptance Criteria"
+    priority: "Priority"
+
+# Used for free-text files (PDF / DOCX / TXT / MD): how requirement IDs are detected.
+text_parsing:
+  id_pattern: "(?:REQ|US|FR|NFR)[-_ ]?\\d+"
+  ac_markers: ["acceptance criteria", "ac:", "given", "when", "then"]
+
+# Local fallback when Drive is disabled/unreachable.
+local_fallback_path: data/sample_user_stories.md

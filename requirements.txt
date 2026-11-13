@@ -1,0 +1,14 @@
+streamlit>=1.37
+pandas>=2.0
+openpyxl>=3.1
+requests>=2.31
+python-dotenv>=1.0
+PyYAML>=6.0
+pypdf>=4.0
+python-docx>=1.1
+# Google Drive input (requirements are read from Drive)
+google-api-python-client>=2.120
+google-auth>=2.28
+google-auth-oauthlib>=1.2
+# Future phase (MCP agent integration) - optional
+# mcp>=1.0
