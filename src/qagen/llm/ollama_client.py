@@ -54,10 +54,9 @@ class OllamaClient:
         payload = {
             "model": self.s.model,
             "stream": False,
-            "think": False,                       # Qwen3: skip the slow reasoning phase
             "messages": [
                 {"role": "system", "content": system},
-                {"role": "user", "content": user + "\n/no_think"},
+                {"role": "user", "content": user},
             ],
             "options": {
                 "num_ctx": self.s.num_ctx,
