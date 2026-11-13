@@ -1,0 +1,14 @@
+from VS code terminal 
+python -m venv venv
+.\venv\scripts\Activate.ps1
+
+run followig commands from Cmd as adminstrator mode
+  wsl
+  ollama list
+  ollama run qwen2.5:3b
+
+open another Cmd as administrator mode
+go to folder  qa_testgen_agent 
+run following files 
+  Setup.bat
+  run.bat
