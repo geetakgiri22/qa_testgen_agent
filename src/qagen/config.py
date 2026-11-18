@@ -16,6 +16,10 @@ def _env(name: str, default: str) -> str:
     return os.getenv(name, default)
 
 
+def _env_bool(name: str, default: bool) -> bool:
+    return _env(name, str(default)).strip().lower() in {"1", "true", "yes", "on"}
+
+
 @dataclass(frozen=True)
 class OllamaSettings:
     base_url: str = field(default_factory=lambda: _env("OLLAMA_BASE_URL", "http://localhost:11434"))
@@ -41,9 +45,19 @@ class GenerationSettings:
 
 
 @dataclass(frozen=True)
+class LangSmithSettings:
+    enabled: bool = field(default_factory=lambda: _env_bool("LANGSMITH_TRACING", False))
+    api_key: str = field(default_factory=lambda: _env("LANGSMITH_API_KEY", ""))
+    endpoint: str = field(default_factory=lambda: _env("LANGSMITH_ENDPOINT", "https://api.smith.langchain.com"))
+    agent_id: str = field(default_factory=lambda: _env("LANGSMITH_AGENT_ID", "qatestcasegeneratoragent"))
+    agent_environment: str = field(default_factory=lambda: _env("LANGSMITH_AGENT_ENVIRONMENT", "local"))
+
+
+@dataclass(frozen=True)
 class Settings:
     ollama: OllamaSettings = field(default_factory=OllamaSettings)
     generation: GenerationSettings = field(default_factory=GenerationSettings)
+    langsmith: LangSmithSettings = field(default_factory=LangSmithSettings)
     drive_config_path: Path = field(
         default_factory=lambda: ROOT / _env("DRIVE_CONFIG_PATH", "drive_config.yaml")
     )

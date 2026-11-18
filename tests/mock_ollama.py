@@ -60,7 +60,11 @@ class Handler(BaseHTTPRequestHandler):
                        "missing_criteria": ["Validation rules for phone number format"]}
         # emulate Qwen3 leaking a think block to test the stripper
         content = "<think>reasoning</think>" + json.dumps(payload)
-        self._send({"message": {"role": "assistant", "content": content}})
+        self._send({
+            "message": {"role": "assistant", "content": content},
+            "prompt_eval_count": 11,
+            "eval_count": 7,
+        })
 
 
 def start(port=0):

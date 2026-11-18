@@ -88,10 +88,26 @@ requirement and acceptance-criteria coverage.
 so the context stays small. Qwen3 "thinking" is disabled for speed. Expect about 1 to 3 minutes per requirement on CPU; lower
 `MAX_TESTS_PER_REQUIREMENT` or `OLLAMA_NUM_PREDICT` to go faster.
 
+## Optional LangSmith tracing
+
+Set these values in `.env` to trace each successful Ollama call:
+
+```
+LANGSMITH_TRACING=true
+LANGSMITH_API_KEY=your-langsmith-api-key
+LANGSMITH_ENDPOINT=https://api.smith.langchain.com
+LANGSMITH_AGENT_ID=qatestcasegeneratoragent
+LANGSMITH_AGENT_ENVIRONMENT=local
+```
+
+The trace includes the full system/user prompts, the model output, and Ollama's prompt, completion, and total token counts.
+This sends requirement content and generated output to LangSmith; enable it only when that data may be shared with your LangSmith workspace.
+Tracing is disabled by default. If enabled without an API key, app startup reports a configuration error. The agent must exist in the LangSmith workspace before traces can be sent.
+
 ## Tests
 
 ```
-python tests/run_tests.py     # 16 tests, no extra packages (pytest -q also works)
+python tests/run_tests.py     # 18 tests, no extra packages (pytest -q also works)
 python tests/smoke_ui.py      # runs every page function against a stubbed Streamlit
 ```
 Tests use a fake Ollama server (`tests/mock_ollama.py`), so they need neither the model nor internet.

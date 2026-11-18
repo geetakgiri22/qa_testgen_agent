@@ -1,11 +1,14 @@
 import io
 from pathlib import Path
+import sys
+from types import SimpleNamespace
+from unittest.mock import patch
 
 import openpyxl
 import pandas as pd
 
 from mock_ollama import start
-from qagen.config import GenerationSettings, OllamaSettings
+from qagen.config import GenerationSettings, LangSmithSettings, OllamaSettings, load_settings
 from qagen.ingestion.parsers import parse_requirements
 from qagen.llm.ollama_client import OllamaClient
 from qagen.services import exporter
@@ -28,6 +31,74 @@ def test_health_check_ok_and_down():
     bad = OllamaClient(OllamaSettings(base_url="http://127.0.0.1:9", timeout=1))
     h = bad.health_check()
     assert not h.ok and not h.server_up
+
+
+def test_langsmith_traces_prompt_output_and_token_usage():
+    srv = start()
+    captured = {}
+
+    class FakeClient:
+        def __init__(self, **kwargs):
+            captured["client_config"] = kwargs
+
+    def fake_agent_address(agent_id, environment):
+        return {"agent_id": agent_id, "environment": environment}
+
+    def fake_traceable(fn, **trace_options):
+        def traced(*args):
+            captured["inputs"] = {"messages": args[0], "options": args[1], "json_mode": args[2]}
+            captured["trace_options"] = trace_options
+            captured["outputs"] = fn(*args)
+            return captured["outputs"]
+        return traced
+
+    fake_langsmith = SimpleNamespace(
+        Client=FakeClient,
+        agent_address=fake_agent_address,
+        traceable=fake_traceable,
+    )
+    with patch.dict(sys.modules, {"langsmith": fake_langsmith}):
+        client = OllamaClient(
+            OllamaSettings(base_url=f"http://127.0.0.1:{srv.server_port}", timeout=10),
+            LangSmithSettings(enabled=True, api_key="test-key"),
+        )
+        output = client.chat("system prompt", "requirement input")
+
+    assert output.startswith("{")
+    assert captured["inputs"]["messages"] == [
+        {"role": "system", "content": [{"type": "text", "text": "system prompt"}]},
+        {"role": "user", "content": [{"type": "text", "text": "requirement input"}]},
+    ]
+    assert captured["outputs"]["choices"][0]["message"]["content"] == output
+    assert captured["outputs"]["usage_metadata"] == {
+        "input_tokens": 11, "output_tokens": 7, "total_tokens": 18,
+    }
+    assert captured["trace_options"]["run_type"] == "llm"
+    assert captured["trace_options"]["metadata"] == {
+        "ls_provider": "ollama", "ls_model_name": "qwen2.5:3b",
+    }
+    assert captured["trace_options"]["address"] == {
+        "agent_id": "qatestcasegeneratoragent", "environment": "local",
+    }
+    assert captured["client_config"]["api_key"] == "test-key"
+
+
+def test_langsmith_settings_load_from_environment():
+    env = {
+        "LANGSMITH_TRACING": "yes",
+        "LANGSMITH_API_KEY": "test-key",
+        "LANGSMITH_ENDPOINT": "https://example.test",
+        "LANGSMITH_AGENT_ID": "qatestcasegeneratoragent",
+        "LANGSMITH_AGENT_ENVIRONMENT": "local",
+    }
+    with patch.dict("os.environ", env, clear=False):
+        settings = load_settings().langsmith
+
+    assert settings.enabled
+    assert settings.api_key == "test-key"
+    assert settings.endpoint == "https://example.test"
+    assert settings.agent_id == "qatestcasegeneratoragent"
+    assert settings.agent_environment == "local"
 
 
 def test_parse_markdown_sample():

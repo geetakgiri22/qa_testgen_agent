@@ -4,6 +4,7 @@ openpyxl>=3.1
 requests>=2.31
 python-dotenv>=1.0
 PyYAML>=6.0
+langsmith>=0.3.45
 pypdf>=4.0
 python-docx>=1.1
 # Google Drive input (requirements are read from Drive)
